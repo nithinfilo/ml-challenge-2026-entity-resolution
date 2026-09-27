@@ -1,0 +1,89 @@
+pairs train=33,453,830 (pos 6,042,227)  val=8,365,893 (pos 1,511,869)
+Training until validation scores don't improve for 100 rounds
+[100]	valid_0's binary_logloss: 0.0256786
+[200]	valid_0's binary_logloss: 0.0211551
+[300]	valid_0's binary_logloss: 0.0200384
+[400]	valid_0's binary_logloss: 0.0195886
+[500]	valid_0's binary_logloss: 0.0193433
+[600]	valid_0's binary_logloss: 0.0191354
+[700]	valid_0's binary_logloss: 0.0189921
+[800]	valid_0's binary_logloss: 0.0188998
+[900]	valid_0's binary_logloss: 0.0188203
+[1000]	valid_0's binary_logloss: 0.0187379
+[1100]	valid_0's binary_logloss: 0.0186649
+[1200]	valid_0's binary_logloss: 0.0186056
+[1300]	valid_0's binary_logloss: 0.0185568
+[1400]	valid_0's binary_logloss: 0.0185079
+[1500]	valid_0's binary_logloss: 0.0184546
+[1600]	valid_0's binary_logloss: 0.018419
+[1700]	valid_0's binary_logloss: 0.0183811
+[1800]	valid_0's binary_logloss: 0.0183483
+[1900]	valid_0's binary_logloss: 0.0183189
+[2000]	valid_0's binary_logloss: 0.0182972
+[2100]	valid_0's binary_logloss: 0.0182767
+[2200]	valid_0's binary_logloss: 0.0182574
+[2300]	valid_0's binary_logloss: 0.0182329
+[2400]	valid_0's binary_logloss: 0.0182151
+[2500]	valid_0's binary_logloss: 0.0181964
+[2600]	valid_0's binary_logloss: 0.0181786
+[2700]	valid_0's binary_logloss: 0.0181657
+[2800]	valid_0's binary_logloss: 0.0181545
+[2900]	valid_0's binary_logloss: 0.0181407
+[3000]	valid_0's binary_logloss: 0.0181312
+[3100]	valid_0's binary_logloss: 0.0181224
+[3200]	valid_0's binary_logloss: 0.0181113
+[3300]	valid_0's binary_logloss: 0.0181065
+[3400]	valid_0's binary_logloss: 0.0180984
+[3500]	valid_0's binary_logloss: 0.0180922
+[3600]	valid_0's binary_logloss: 0.0180855
+[3700]	valid_0's binary_logloss: 0.0180769
+[3800]	valid_0's binary_logloss: 0.0180733
+[3900]	valid_0's binary_logloss: 0.0180702
+[4000]	valid_0's binary_logloss: 0.0180663
+[4100]	valid_0's binary_logloss: 0.01806
+[4200]	valid_0's binary_logloss: 0.01806
+[4300]	valid_0's binary_logloss: 0.0180536
+[4400]	valid_0's binary_logloss: 0.0180502
+[4500]	valid_0's binary_logloss: 0.0180499
+[4600]	valid_0's binary_logloss: 0.0180456
+[4700]	valid_0's binary_logloss: 0.0180446
+Early stopping, best iteration is:
+[4630]	valid_0's binary_logloss: 0.0180431
+blocking ceiling (oracle on candidates) macro F0.5 = 0.9964
+  one_to_one=False thr=0.20 macroF0.5=0.9620
+  one_to_one=False thr=0.25 macroF0.5=0.9659
+  one_to_one=False thr=0.30 macroF0.5=0.9688
+  one_to_one=False thr=0.35 macroF0.5=0.9712
+  one_to_one=False thr=0.40 macroF0.5=0.9731
+  one_to_one=False thr=0.45 macroF0.5=0.9747
+  one_to_one=False thr=0.50 macroF0.5=0.9758
+  one_to_one=False thr=0.55 macroF0.5=0.9768
+  one_to_one=False thr=0.60 macroF0.5=0.9775
+  one_to_one=False thr=0.65 macroF0.5=0.9780
+  one_to_one=False thr=0.70 macroF0.5=0.9782
+  one_to_one=False thr=0.75 macroF0.5=0.9782
+  one_to_one=False thr=0.80 macroF0.5=0.9777
+  one_to_one=False thr=0.85 macroF0.5=0.9765
+  one_to_one=False thr=0.90 macroF0.5=0.9743
+  one_to_one=False thr=0.95 macroF0.5=0.9692
+  one_to_one=True thr=0.20 macroF0.5=0.9640
+  one_to_one=True thr=0.25 macroF0.5=0.9674
+  one_to_one=True thr=0.30 macroF0.5=0.9700
+  one_to_one=True thr=0.35 macroF0.5=0.9722
+  one_to_one=True thr=0.40 macroF0.5=0.9739
+  one_to_one=True thr=0.45 macroF0.5=0.9753
+  one_to_one=True thr=0.50 macroF0.5=0.9763
+  one_to_one=True thr=0.55 macroF0.5=0.9772
+  one_to_one=True thr=0.60 macroF0.5=0.9778
+  one_to_one=True thr=0.65 macroF0.5=0.9783
+  one_to_one=True thr=0.70 macroF0.5=0.9784
+  one_to_one=True thr=0.75 macroF0.5=0.9783
+  one_to_one=True thr=0.80 macroF0.5=0.9778
+  one_to_one=True thr=0.85 macroF0.5=0.9766
+  one_to_one=True thr=0.90 macroF0.5=0.9743
+  one_to_one=True thr=0.95 macroF0.5=0.9692
+BEST threshold=0.72 one_to_one=True macro F0.5=0.9784
+GROUP thresholds {0: 0.72, 2: 0.7, 4: 0.7499999999999999, 6: 0.7499999999999999} -> macro F0.5=0.9785
+  India: macro F0.5 = 0.9745 over 176,858 entities
+  US: macro F0.5 = 0.9810 over 264,778 entities
+top features: [('combo', np.float64(1.0)), ('combo_gap', np.float64(0.282)), ('b_combo_rank', np.float64(0.082)), ('b_combo_gap', np.float64(0.061)), ('a_num_jacc', np.float64(0.051)), ('sim_addr', np.float64(0.048)), ('combo_rank', np.float64(0.039)), ('n_full_ratio', np.float64(0.035)), ('house_ratio', np.float64(0.031)), ('amb_name', np.float64(0.026)), ('house_rel', np.float64(0.024)), ('n_jacc', np.float64(0.014)), ('b_combo_max', np.float64(0.013)), ('n_tsort', np.float64(0.013)), ('n_jw', np.float64(0.012))]

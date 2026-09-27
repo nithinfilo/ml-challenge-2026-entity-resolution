@@ -1,0 +1,10 @@
+stack rows 8,365,893 (pos 1,511,869), 36 features
+first stage alone: thr=0.70 macro F0.5=0.9784
+  fold 0: best_iter 518
+  fold 1: best_iter 609
+  fold 2: best_iter 356
+  fold 3: best_iter 478
+STACK: thr=0.72 one_to_one=True macro F0.5=0.9792  (first stage 0.9784)
+  India: macro F0.5 = 0.9752
+  US: macro F0.5 = 0.9820
+top stack features: [('p_logit', np.float64(1.0)), ('p', np.float64(0.333)), ('p_gap', np.float64(0.021)), ('p_max', np.float64(0.003)), ('b_p_max', np.float64(0.002)), ('b_p_sum', np.float64(0.001)), ('p_sum', np.float64(0.001)), ('p_second', np.float64(0.001)), ('n_hi_addr', np.float64(0.001)), ('b_p_gap', np.float64(0.001)), ('n_p90', np.float64(0.0)), ('n_hi_name', np.float64(0.0))]

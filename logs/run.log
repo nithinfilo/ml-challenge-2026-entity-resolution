@@ -1,0 +1,151 @@
+=== TRANSLIT 11:25:04
+  .explode("matched_entity_ids").rename({"matched_entity_ids": "entity_id"})
+pairs with Indic names: 551,240; aligned: 510,890; dictionary size: 1,347
+=== NORMALIZE 11:25:18
+normalised 1,732,544 records from test_source1.tsv -> work/norm/test_source1.parquet
+normalised 4,887,273 records from test_source2.tsv -> work/norm/test_source2.parquet
+normalised 5,082,316 records from test_source3.tsv -> work/norm/test_source3.parquet
+=== BLOCK India 11:28:29
+[India] A=883,188 B=4,133,346
+blocking recall: 3,005,431/3,059,843 = 0.9822; candidates/S1 = 49.7; total pairs = 43,914,010
+   sim_name channel recall: 0.8501
+   sim_addr channel recall: 0.8790
+   S1 entities with full recall: 0.9455
+[India] wrote 43,914,010 pairs in 584s
+=== FEATURES India 11:38:17
+  chunk 15: 1,483,700 pairs -> 488,082 rows kept, t=251s
+features: 15,276,278 rows x 56 features -> work/full_feats_India
+=== BLOCK US 11:42:32
+[US] A=1,323,633 B=6,186,873
+blocking recall: 4,548,665/4,578,522 = 0.9935; candidates/S1 = 58.8; total pairs = 77,860,653
+   sim_name channel recall: 0.9010
+   sim_addr channel recall: 0.9190
+   S1 entities with full recall: 0.9789
+[US] wrote 77,860,653 pairs in 704s
+=== FEATURES US 11:54:18
+  chunk 37: 696,581 pairs -> 212,442 rows kept, t=422s
+features: 26,543,445 rows x 56 features -> work/full_feats_US
+=== TRAIN 12:01:24
+pairs train=33,453,830 (pos 6,042,227)  val=8,365,893 (pos 1,511,869)
+Training until validation scores don't improve for 100 rounds
+Did not meet early stopping. Best iteration is:
+blocking ceiling (oracle on candidates) macro F0.5 = 0.9964
+BEST threshold=0.69 one_to_one=True macro F0.5=0.9780
+GROUP thresholds {0: 0.69, 2: 0.69, 4: 0.69, 6: 0.7} -> macro F0.5=0.9780
+  India: macro F0.5 = 0.9742 over 176,858 entities
+  US: macro F0.5 = 0.9806 over 264,778 entities
+top features: [('combo', np.float64(1.0)), ('combo_gap', np.float64(0.283)), ('b_combo_rank', np.float64(0.077)), ('b_combo_gap', np.float64(0.068)), ('a_num_jacc', np.float64(0.053)), ('sim_addr', np.float64(0.046)), ('combo_rank', np.float64(0.038)), ('n_full_ratio', np.float64(0.033)), ('house_ratio', np.float64(0.032)), ('amb_name', np.float64(0.025)), ('house_rel', np.float64(0.025)), ('n_jacc', np.float64(0.014)), ('b_combo_max', np.float64(0.013)), ('n_jw', np.float64(0.012)), ('n_tsort', np.float64(0.011))]
+=== PREDICT 12:52:34
+=== stage block France 12:52:34
+[France] A=259,452 B=1,434,993
+  France HDF  A=101,521 B=  587,284 pairs=  5,182,857 t=   59.0s
+  France NAQ  A= 85,197 B=  500,610 pairs=  9,531,828 t=   99.5s
+  France PDL  A= 72,734 B=  433,255 pairs= 13,229,901 t=  128.9s
+[France] blocking: 13,229,901 pairs (51.0/entity) in 130s
+=== stage block India 12:54:45
+[India] A=809,986 B=4,717,565
+  India  AN   A=    176 B=  112,550 pairs=    138,253 t=    1.0s
+  India  AP   A= 66,871 B=  493,266 pairs=  3,597,785 t=   31.1s
+  India  AR   A=    322 B=  113,005 pairs=  3,783,393 t=   32.1s
+  India  AS   A=     14 B=  112,048 pairs=  3,796,235 t=   33.0s
+  India  BR   A= 21,260 B=  232,994 pairs=  5,042,444 t=   38.9s
+  India  CH   A=     78 B=  112,232 pairs=  5,115,343 t=   39.8s
+  India  DD   A=      1 B=  112,010 pairs=  5,117,099 t=   40.7s
+  India  DL   A=110,544 B=  740,482 pairs= 10,919,380 t=  131.9s
+  India  DN   A=      2 B=  112,007 pairs= 10,920,373 t=  132.8s
+  India  GA   A=     27 B=  112,087 pairs= 10,942,597 t=  133.8s
+  India  GJ   A= 52,700 B=  410,853 pairs= 13,680,727 t=  153.5s
+  India  HP   A=      2 B=  112,012 pairs= 13,682,137 t=  154.4s
+  India  HR   A= 32,821 B=  298,464 pairs= 15,497,240 t=  164.3s
+  India  JH   A=      4 B=  112,019 pairs= 15,502,622 t=  165.2s
+  India  JK   A=      1 B=  112,006 pairs= 15,503,653 t=  166.1s
+  India  KA   A= 64,860 B=  480,928 pairs= 18,889,125 t=  194.5s
+  India  KL   A= 32,269 B=  295,825 pairs= 20,620,069 t=  204.2s
+  India  LA   A=     62 B=  112,198 pairs= 20,686,140 t=  205.1s
+  India  LD   A=      8 B=  112,032 pairs= 20,691,052 t=  206.0s
+  India  MH   A=175,375 B=1,109,034 pairs= 29,764,968 t=  492.7s
+  India  ML   A=      1 B=  112,010 pairs= 29,765,352 t=  493.6s
+  India  MP   A= 20,609 B=  229,587 pairs= 30,987,059 t=  499.0s
+  India  MZ   A=      1 B=  112,010 pairs= 30,988,740 t=  499.9s
+  India  NY   A=      1 B=  112,005 pairs= 30,988,910 t=  500.8s
+  India  OD   A= 12,896 B=  185,344 pairs= 31,845,732 t=  504.0s
+  India  PB   A= 11,697 B=  178,796 pairs= 32,656,188 t=  507.2s
+  India  PY   A=      1 B=  112,012 pairs= 32,658,523 t=  508.1s
+  India  RJ   A= 29,131 B=  278,158 pairs= 34,287,460 t=  516.1s
+  India  SK   A=      1 B=  112,009 pairs= 34,288,990 t=  517.1s
+  India  TN   A= 58,400 B=  443,828 pairs= 37,335,744 t=  540.4s
+  India  TR   A=      2 B=  112,010 pairs= 37,339,489 t=  541.3s
+  India  UK   A=     23 B=  112,086 pairs= 37,360,367 t=  542.3s
+  India  UP   A= 67,389 B=  495,217 pairs= 40,860,786 t=  572.3s
+  India  WB   A= 52,437 B=  410,600 pairs= 43,645,815 t=  593.0s
+[India] blocking: 43,645,815 pairs (53.9/entity) in 598s
+=== stage block US 13:04:45
+[US] A=663,106 B=3,817,031
+  US     AK   A=  1,846 B=  120,720 pairs=    288,041 t=    1.3s
+  US     AL   A= 16,456 B=  202,503 pairs=  1,265,849 t=    5.4s
+  US     AR   A= 13,724 B=  186,936 pairs=  2,125,468 t=    9.0s
+  US     AZ   A= 28,846 B=  270,992 pairs=  3,683,300 t=   17.4s
+  US     CA   A= 18,943 B=  216,652 pairs=  4,771,770 t=   22.5s
+  US     CO   A=  2,180 B=  122,539 pairs=  5,081,800 t=   23.8s
+  US     CT   A=  9,387 B=  162,915 pairs=  5,745,246 t=   26.2s
+  US     DE   A=  4,423 B=  135,275 pairs=  6,178,030 t=   27.9s
+  US     FL   A=    334 B=  112,264 pairs=  6,295,085 t=   28.9s
+  US     GA   A=  1,537 B=  119,001 pairs=  6,559,354 t=   30.1s
+  US     IA   A= 11,168 B=  172,758 pairs=  7,308,363 t=   33.0s
+  US     ID   A=    589 B=  113,704 pairs=  7,475,142 t=   34.1s
+  US     IL   A= 37,858 B=  321,622 pairs=  9,449,326 t=   45.8s
+  US     IN   A= 24,784 B=  249,076 pairs= 10,805,386 t=   52.2s
+  US     KS   A=  7,754 B=  153,801 pairs= 11,396,415 t=   54.4s
+  US     KY   A= 14,703 B=  192,596 pairs= 12,293,209 t=   58.1s
+  US     LA   A=  2,154 B=  122,424 pairs= 12,602,669 t=   59.4s
+  US     MA   A= 28,263 B=  268,813 pairs= 14,125,953 t=   67.0s
+  US     MD   A= 20,136 B=  223,166 pairs= 15,269,019 t=   72.3s
+  US     ME   A=  6,057 B=  144,148 pairs= 15,782,049 t=   74.2s
+  US     MN   A= 15,691 B=  198,201 pairs= 16,734,346 t=   78.0s
+  US     MO   A= 12,789 B=  181,900 pairs= 17,549,698 t=   81.3s
+  US     MT   A=  4,986 B=  138,284 pairs= 18,011,044 t=   83.0s
+  US     NC   A= 47,752 B=  377,061 pairs= 20,401,956 t=   99.4s
+  US     ND   A=  3,376 B=  129,545 pairs= 20,785,783 t=  100.9s
+  US     NE   A=  2,903 B=  126,686 pairs= 21,140,032 t=  102.3s
+  US     NM   A=  5,897 B=  143,491 pairs= 21,638,918 t=  104.2s
+  US     NY   A= 50,775 B=  394,330 pairs= 24,215,352 t=  121.6s
+  US     OH   A= 42,332 B=  346,579 pairs= 26,371,783 t=  134.8s
+  US     OK   A= 11,361 B=  173,903 pairs= 27,131,526 t=  137.7s
+  US     OR   A= 15,035 B=  194,493 pairs= 28,051,338 t=  141.5s
+  US     PA   A=  6,030 B=  144,144 pairs= 28,565,743 t=  143.4s
+  US     RI   A=    347 B=  112,372 pairs= 28,677,461 t=  144.5s
+  US     SC   A=  1,590 B=  119,283 pairs= 28,945,612 t=  145.7s
+  US     SD   A=    636 B=  113,979 pairs= 29,114,823 t=  146.8s
+  US     TN   A= 30,144 B=  279,130 pairs= 30,708,766 t=  155.5s
+  US     TX   A= 66,508 B=  482,184 pairs= 33,963,029 t=  184.2s
+  US     UT   A= 11,506 B=  174,590 pairs= 34,727,584 t=  187.2s
+  US     VA   A= 29,820 B=  277,431 pairs= 36,299,593 t=  195.8s
+  US     VT   A=  2,580 B=  124,881 pairs= 36,634,598 t=  197.1s
+  US     WA   A= 24,762 B=  248,822 pairs= 38,013,740 t=  203.7s
+  US     WI   A= 15,823 B=  199,027 pairs= 38,972,690 t=  207.7s
+  US     WV   A=  7,989 B=  155,096 pairs= 39,570,217 t=  210.0s
+  US     WY   A=  1,332 B=  117,913 pairs= 39,820,731 t=  211.2s
+[US] blocking: 39,820,731 pairs (60.1/entity) in 215s
+=== stage score France 13:08:21
+[France] scored 13,229,901 pairs in 419s
+=== stage score India 13:15:22
+[India] scored 43,645,815 pairs in 2503s
+=== stage score US 13:57:06
+[US] scored 39,820,731 pairs in 2199s
+=== stage output France 14:33:48
+[France] matches: 907,728 pairs for 246,947 entities; 12,505 singletons
+[France] candidates: 13,229,901 pairs written
+=== stage output India 14:33:51
+[India] matches: 2,825,749 pairs for 769,021 entities; 40,965 singletons
+[India] candidates: 43,645,815 pairs written
+=== stage output US 14:34:01
+[US] matches: 2,306,906 pairs for 627,697 entities; 35,409 singletons
+[US] candidates: 39,820,731 pairs written
+merged outputs -> output
+=== done 14:34:12
+=== VALIDATE 14:34:12
+WARNING: ID-existence check is OFF (the default) — not checking that matched/candidate IDs exist in the test set. Every other rule is still checked. Re-run with --check-ids to enable it (needs test_source2/3.tsv; uses more memory). A nonexistent ID only lowers your score, never rejects your submission.
+PASS — no blocking issues found. Safe to submit.
+=== PACKAGE 14:35:36
+-rw-rw-r-- 1 ubuntu ubuntu 572771371 Sep 27 14:37 team_submission.zip
+=== DONE 14:37:23

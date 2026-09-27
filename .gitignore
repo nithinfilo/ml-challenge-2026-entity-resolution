@@ -13,3 +13,7 @@ dataset/
 *.zip
 *.parquet
 *.log
+!work/model_v2/
+!work/model_v2/**
+!logs/
+!logs/*.log

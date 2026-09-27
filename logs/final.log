@@ -1,0 +1,27 @@
+=== stage block France: reusing test_pairs_France.parquet
+=== stage block India: reusing test_pairs_India.parquet
+=== stage block US: reusing test_pairs_US.parquet
+=== stage score France 15:45:37
+[France] scored 13,229,901 pairs in 620s
+=== stage score India 15:55:58
+[India] scored 43,645,815 pairs in 2043s
+=== stage score US 16:30:03
+[US] scored 39,820,731 pairs in 1838s
+=== stage output France 17:00:44
+[France] second stage applied (thr 0.72)
+[France] matches: 903,496 pairs for 246,392 entities; 13,060 singletons
+[France] candidates: 13,229,901 pairs written
+=== stage output India 17:01:26
+[India] second stage applied (thr 0.72)
+[India] matches: 2,817,545 pairs for 765,424 entities; 44,562 singletons
+[India] candidates: 43,645,815 pairs written
+=== stage output US 17:03:37
+[US] second stage applied (thr 0.72)
+[US] matches: 2,313,950 pairs for 627,085 entities; 36,021 singletons
+[US] candidates: 39,820,731 pairs written
+merged outputs -> output
+=== done 17:05:44
+=== VALIDATE
+PASS — no blocking issues found. Safe to submit.
+-rw-rw-r-- 1 ubuntu ubuntu 572741003 Sep 27 17:08 team_submission_v2.zip
+=== DONE2
