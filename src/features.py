@@ -40,7 +40,10 @@ PAIR_COLS = [
 CTX_COLS = ["sim_name", "sim_addr", "amb_name", "amb_addr", "b_nonlatin", "b_domain", "b_addr_missing"]
 GROUP_COLS = ["combo", "n_cands", "n_tsr_max", "a_tsr_max", "combo_max", "n_tsr_rank", "a_tsr_rank",
               "combo_rank", "n_hi_name", "n_hi_addr", "n_tsr_gap", "a_tsr_gap", "combo_gap",
-              "b_deg", "b_combo_max", "b_combo_rank", "b_combo_gap"]
+              "b_deg", "b_combo_max", "b_combo_rank", "b_combo_gap",
+              # twin / uniqueness features (v2)
+              "n_house_eq", "n_name_eq", "n_both_eq", "twin_better", "b_name_eq_cnt", "b_house_eq_cnt",
+              "name_uniq_state"]
 FEATURE_COLS = CTX_COLS + PAIR_COLS + GROUP_COLS
 
 STR_COLS = ["name_core", "name_compact", "name_norm", "addr_norm", "addr_nums", "house_no", "state"]
@@ -114,11 +117,14 @@ def context_frames(a: pl.DataFrame, b: pl.DataFrame, a_full: pl.DataFrame | None
     ref = a_full if a_full is not None else a
     amb_n = ref.group_by("country", "name_core").len().rename({"len": "amb_name"})
     amb_a = ref.group_by("country", "addr_norm", "house_no").len().rename({"len": "amb_addr"})
+    uniq_s = ref.group_by("country", "state", "name_compact").len().rename({"len": "name_uniq_state"})
     a_sel = a.select(A_COLS + ["a_idx"]) if "a_idx" in a.columns else a.select(A_COLS).with_row_index("a_idx")
     a_ctx = (a_sel
                .join(amb_n, on=["country", "name_core"], how="left")
                .join(amb_a, on=["country", "addr_norm", "house_no"], how="left")
+               .join(uniq_s, on=["country", "state", "name_compact"], how="left")
                .with_columns(pl.col("amb_name").fill_null(1).cast(pl.Float32),
+                             pl.col("name_uniq_state").fill_null(1).cast(pl.Float32),
                              pl.when(pl.col("addr_norm") == "").then(0.0)
                                .otherwise(pl.col("amb_addr").fill_null(1)).cast(pl.Float32).alias("amb_addr")))
     b_ctx = b.select(B_COLS + ["b_idx"]) if "b_idx" in b.columns else b.select(B_COLS).with_row_index("b_idx")
@@ -162,7 +168,7 @@ def build_features(pairs: pl.DataFrame, a_ctx: pl.DataFrame, b_ctx: pl.DataFrame
             tasks.append(list(zip(*[s2[c].to_list() for c in cols])))
         mats.extend(pool.map(_worker, tasks))
         outs.append(sl.select("a_idx", "b_idx", "sim_name", "sim_addr", pl.col("country_a").alias("country"),
-                              "amb_name", "amb_addr",
+                              "amb_name", "amb_addr", "name_uniq_state",
                               (pl.col("name_script_b") != "latin").cast(pl.Float32).alias("b_nonlatin"),
                               pl.col("name_domain_b").cast(pl.Float32).alias("b_domain"),
                               pl.col("addr_missing_b").cast(pl.Float32).alias("b_addr_missing")))
@@ -194,6 +200,20 @@ def build_features(pairs: pl.DataFrame, a_ctx: pl.DataFrame, b_ctx: pl.DataFrame
         b_combo_max=pl.col("combo").max().over("b_idx"),
         b_combo_rank=pl.col("combo").rank("min", descending=True).over("b_idx").cast(pl.Float32),
     ).with_columns(b_combo_gap=pl.col("b_combo_max") - pl.col("combo"))
+    # twin features: does this entity have another candidate with the same name whose house number
+    # agrees (then a house-number conflict here is a near-copy distractor), and how many entities
+    # claim this candidate by exact name / house number
+    house_eq = (pl.col("house_rel") == 1).cast(pl.Int32)
+    name_eq = (pl.col("n_cmp_eq") == 1).cast(pl.Int32)
+    out = out.with_columns(
+        n_house_eq=house_eq.sum().over("a_idx").cast(pl.Float32),
+        n_name_eq=name_eq.sum().over("a_idx").cast(pl.Float32),
+        n_both_eq=(house_eq * name_eq).sum().over("a_idx").cast(pl.Float32),
+        b_name_eq_cnt=name_eq.sum().over("b_idx").cast(pl.Float32),
+        b_house_eq_cnt=house_eq.sum().over("b_idx").cast(pl.Float32),
+    ).with_columns(
+        twin_better=((pl.col("n_both_eq") > 0) & (pl.col("house_rel") == -1)).cast(pl.Float32),
+    )
     return out
 
 

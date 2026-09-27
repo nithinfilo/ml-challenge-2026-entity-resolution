@@ -1,5 +1,6 @@
 """Block the full training Source 1 against Source 2+3, one country at a time, global row indices."""
-import sys, time
+import sys, time, os
+os.chdir(os.path.expanduser("~/sr")) if os.path.isdir(os.path.expanduser("~/sr")) else None
 import polars as pl
 sys.path.insert(0, 'code/business_entity_resolution/src')
 from block import run_blocking, evaluate_blocking
@@ -9,7 +10,7 @@ a = pl.read_parquet('work/norm/train_source1.parquet', columns=cols).with_row_in
 b = pl.concat([pl.read_parquet(f'work/norm/train_source{i}.parquet', columns=cols) for i in (2, 3)]).with_row_index("b_idx").filter(pl.col("country") == country)
 print(f"[{country}] A={a.height:,} B={b.height:,}", flush=True)
 t0 = time.time()
-pairs = run_blocking(a.drop("a_idx"), b.drop("b_idx"), threads=8, verbose=False)
+pairs = run_blocking(a.drop("a_idx"), b.drop("b_idx"), threads=int(os.environ.get("THREADS", "8")), verbose=False)
 gt = pl.read_csv('dataset/train/train_ground_truth.tsv', separator="\t", quote_char=None, infer_schema=False)
 evaluate_blocking(pairs, gt, a.drop("a_idx"), b.drop("b_idx"))
 ag, bg = a["a_idx"].to_numpy(), b["b_idx"].to_numpy()

@@ -11,21 +11,21 @@ import polars as pl
 
 from block import gt_pairs_idx
 from features import FEATURE_COLS
-from scoring import decide, macro_f05, sweep, truth_from_pairs
+from scoring import decide, macro_f05, sweep, truth_from_pairs, group_key, tune_group_thresholds, decide_frame_groups, decide_frame_to_dict
 
 PARAMS = dict(
-    objective="binary", learning_rate=0.05, num_leaves=127, min_child_samples=100,
+    objective="binary", learning_rate=0.05, num_leaves=255, min_child_samples=100,
     feature_fraction=0.8, bagging_fraction=0.8, bagging_freq=1, lambda_l2=1.0,
-    max_bin=255, verbose=-1, num_threads=10,
+    max_bin=255, verbose=-1, num_threads=16,
 )
 
 
 def main(feat_dir: str, gt_path: str, out_dir: str, a_path: str, b_paths: list[str], seed: int = 7,
-         val_frac: float = 0.2, rounds: int = 3000, neg_frac: float = 1.0):
+         val_frac: float = 0.2, rounds: int = 3000, neg_frac: float = 1.0, states: list[str] | None = None):
     os.makedirs(out_dir, exist_ok=True)
     dirs = feat_dir if isinstance(feat_dir, list) else [feat_dir]
     df = pl.concat([pl.read_parquet(p) for d in dirs for p in sorted(glob.glob(f"{d}/part_*.parquet"))])
-    a = pl.read_parquet(a_path, columns=["entity_id", "country"])
+    a = pl.read_parquet(a_path, columns=["entity_id", "country", "state"])
     b = pl.concat([pl.read_parquet(p, columns=["entity_id"]) for p in b_paths])
     gt = pl.read_csv(gt_path, separator="\t", quote_char=None, infer_schema=False)
     truth_pairs = gt_pairs_idx(gt, a, b)
@@ -34,6 +34,8 @@ def main(feat_dir: str, gt_path: str, out_dir: str, a_path: str, b_paths: list[s
                 .with_columns(pl.col("y").fill_null(0)))
     rng = np.random.default_rng(seed)
     val_mask = rng.random(a.height) < val_frac
+    if states:  # dev mode: only entities of these states are scored
+        val_mask &= a["state"].is_in(states).to_numpy()
     val_ids = np.flatnonzero(val_mask)
     is_val = df["a_idx"].is_in(pl.Series(val_ids, dtype=pl.UInt32).implode())
     tr, va = df.filter(~is_val), df.filter(is_val)
@@ -65,6 +67,10 @@ def main(feat_dir: str, gt_path: str, out_dir: str, a_path: str, b_paths: list[s
         if f > best[1]:
             best = (t, f, best[2])
     print(f"BEST threshold={best[0]:.2f} one_to_one={best[2]} macro F0.5={best[1]:.4f}")
+    scored_g = scored.with_columns(va.select(group_key(va))["g"])
+    gthr, gbest = tune_group_thresholds(scored_g, truth, best[0], best[2])
+    print(f"GROUP thresholds {gthr} -> macro F0.5={gbest:.4f}")
+    use_groups = gbest > best[1] + 1e-4
     # per-country breakdown at the chosen operating point
     pred = decide(scored, best[0], best[2])
     ctry = a["country"].to_list()
@@ -74,11 +80,12 @@ def main(feat_dir: str, gt_path: str, out_dir: str, a_path: str, b_paths: list[s
     model.save_model(os.path.join(out_dir, "model.txt"), num_iteration=model.best_iteration)
     imp = sorted(zip(FEATURE_COLS, model.feature_importance("gain")), key=lambda x: -x[1])
     with open(os.path.join(out_dir, "config.json"), "w") as fh:
-        json.dump({"threshold": best[0], "one_to_one": best[2], "val_macro_f05": best[1],
+        json.dump({"threshold": best[0], "one_to_one": best[2], "val_macro_f05": max(best[1], gbest),
+                   "group_thresholds": {str(k): v for k, v in gthr.items()} if use_groups else None,
                    "best_iteration": model.best_iteration, "neg_frac": neg_frac,
                    "feature_importance": [(k, float(v)) for k, v in imp]}, fh, indent=1)
     print("top features:", [(k, round(v / imp[0][1], 3)) for k, v in imp[:15]])
-    scored.write_parquet(os.path.join(out_dir, "val_scored.parquet"))
+    scored_g.write_parquet(os.path.join(out_dir, "val_scored.parquet"))
 
 
 if __name__ == "__main__":
@@ -90,5 +97,6 @@ if __name__ == "__main__":
     ap.add_argument("--b", nargs="+", required=True)
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--rounds", type=int, default=3000)
+    ap.add_argument("--states", nargs="*", default=None, help="dev mode: restrict validation to these states")
     args = ap.parse_args()
-    main(args.features, args.gt, args.out_dir, args.a, args.b, rounds=args.rounds)
+    main(args.features, args.gt, args.out_dir, args.a, args.b, rounds=args.rounds, states=args.states)

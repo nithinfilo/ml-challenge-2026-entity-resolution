@@ -52,6 +52,51 @@ def decide_frame(scored: pl.DataFrame, threshold: float, one_to_one: bool = True
     return df.select("s1_id", "cand_id")
 
 
+GROUP_KEY_COLS = ["b_addr_missing", "amb_name", "n_cands"]
+
+
+def group_key(df: pl.DataFrame) -> pl.Series:
+    """Small categorical key for per-group thresholds: address missing x ambiguous name x single candidate."""
+    return ((pl.col("b_addr_missing") > 0).cast(pl.Int32) * 4
+            + (pl.col("amb_name") > 1).cast(pl.Int32) * 2
+            + (pl.col("n_cands") <= 1).cast(pl.Int32)).alias("g")
+
+
+def decide_frame_groups(scored: pl.DataFrame, thresholds: dict, default: float, one_to_one: bool = True) -> pl.DataFrame:
+    """Like decide_frame but with a threshold per group key (column 'g')."""
+    thr = pl.col("g").cast(pl.Utf8).replace_strict({str(k): float(v) for k, v in thresholds.items()},
+                                                    default=default, return_dtype=pl.Float64)
+    df = scored.filter(pl.col("p") >= thr)
+    if one_to_one and df.height:
+        df = df.sort("p", descending=True).unique(subset=["cand_id"], keep="first", maintain_order=True)
+    return df.select("s1_id", "cand_id")
+
+
+def tune_group_thresholds(scored: pl.DataFrame, truth: dict, base: float, one_to_one: bool,
+                          grid=None, passes: int = 2) -> tuple[dict, float]:
+    """Greedy coordinate search of one threshold per group key, starting from the global optimum."""
+    import numpy as np
+    grid = np.arange(0.3, 0.96, 0.05) if grid is None else grid
+    groups = sorted(scored["g"].unique().to_list())
+    thr = {g: base for g in groups}
+    best = macro_f05(decide_frame_to_dict(decide_frame_groups(scored, thr, base, one_to_one)), truth)
+    for _ in range(passes):
+        for g in groups:
+            for t in grid:
+                cand = dict(thr); cand[g] = float(t)
+                f = macro_f05(decide_frame_to_dict(decide_frame_groups(scored, cand, base, one_to_one)), truth)
+                if f > best + 1e-6:
+                    best, thr = f, cand
+    return thr, best
+
+
+def decide_frame_to_dict(df: pl.DataFrame) -> dict:
+    out = {}
+    for a, b in zip(df["s1_id"].to_list(), df["cand_id"].to_list()):
+        out.setdefault(int(a), set()).add(int(b))
+    return out
+
+
 def truth_from_pairs(gp: pl.DataFrame, all_a) -> dict:
     """gp: (a_idx, b_idx) true pairs; all_a: iterable of a_idx to score (singletons included)."""
     out = {int(x): set() for x in all_a}

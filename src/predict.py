@@ -62,6 +62,8 @@ def stage_block(norm_dir: str, work_dir: str, threads: int, country: str) -> Non
 def stage_score(norm_dir: str, model_dir: str, work_dir: str, n_jobs: int, threads: int, country: str) -> None:
     import lightgbm as lgb
     from features import A_COLS, B_COLS, FEATURE_COLS, build_features, context_frames, iter_chunks
+    from scoring import group_key
+    from stack import STACK_BASE_COLS
     t0 = time.time()
     a = _load(norm_dir, "a", A_COLS, country)
     b = _load(norm_dir, "b", B_COLS, country)
@@ -80,7 +82,8 @@ def stage_score(norm_dir: str, model_dir: str, work_dir: str, n_jobs: int, threa
                 continue
             f = build_features(ch, a_ctx, b_ctx, pool, n_jobs=n_jobs)
             p = model.predict(f.select(FEATURE_COLS).to_numpy(), num_threads=threads)
-            part = f.select("a_idx", "b_idx").with_columns(p=pl.Series(p, dtype=pl.Float32))
+            keep = [c for c in STACK_BASE_COLS if c in f.columns]
+            part = f.select("a_idx", "b_idx", group_key(f), *keep).with_columns(p=pl.Series(p, dtype=pl.Float32))
             part.write_parquet(ck)
             parts.append(part)
             print(f"[{country}] chunk {i}: {ch.height:,} pairs scored, t={time.time() - t0:.0f}s", flush=True)
@@ -100,12 +103,25 @@ def _lists(df: pl.DataFrame, a_ids: pl.DataFrame, b_ids: pl.DataFrame, col: str)
 
 
 def stage_output(norm_dir: str, model_dir: str, work_dir: str, country: str) -> None:
-    from scoring import decide_frame
+    from scoring import decide_frame, decide_frame_groups
     cfg = json.load(open(f"{model_dir}/config.json"))
     a_ids = _load(norm_dir, "a", ["entity_id"], country)
     b_ids = _load(norm_dir, "b", ["entity_id"], country).rename({"entity_id": "cand"})
-    scored = pl.read_parquet(f"{work_dir}/test_scored_{country}.parquet").rename({"a_idx": "s1_id", "b_idx": "cand_id"})
-    matches = decide_frame(scored, cfg["threshold"], cfg["one_to_one"]).rename({"s1_id": "a_idx", "cand_id": "b_idx"})
+    scored = pl.read_parquet(f"{work_dir}/test_scored_{country}.parquet")
+    stack_dir = f"{model_dir}/stack"
+    if os.path.exists(f"{stack_dir}/model2.txt"):
+        from stack import apply as stack_apply
+        scfg = json.load(open(f"{stack_dir}/stack_config.json"))
+        scored = stack_apply(stack_dir, scored).select("a_idx", "b_idx", p=pl.col("p2"))
+        cfg = {"threshold": scfg["threshold"], "one_to_one": scfg["one_to_one"], "group_thresholds": None}
+        print(f"[{country}] second stage applied (thr {scfg['threshold']:.2f})", flush=True)
+    scored = scored.rename({"a_idx": "s1_id", "b_idx": "cand_id"})
+    if cfg.get("group_thresholds") and "g" in scored.columns:
+        matches = decide_frame_groups(scored, {int(k): v for k, v in cfg["group_thresholds"].items()},
+                                      cfg["threshold"], cfg["one_to_one"])
+    else:
+        matches = decide_frame(scored, cfg["threshold"], cfg["one_to_one"])
+    matches = matches.rename({"s1_id": "a_idx", "cand_id": "b_idx"})
     del scored
     m = _lists(matches, a_ids, b_ids, "matched_entity_ids")
     m.write_csv(f"{work_dir}/out_matches_{country}.tsv", separator="\t", quote_style="never")
