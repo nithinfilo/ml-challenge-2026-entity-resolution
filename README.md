@@ -81,4 +81,5 @@ python3 utils/validate_submission.py --matching output/matching_results.tsv \
 | `features.py` | pairwise string-similarity, ambiguity, rank and competition features |
 | `train.py` | LightGBM binary matcher, macro-F0.5 threshold sweep, one-to-one assignment choice |
 | `scoring.py` | challenge metric and decision rule |
-| `predict.py` | end-to-end test inference and output writing |
+| `stack.py` | second-stage model: re-scores pairs using the first model's probabilities in entity context |
+| `predict.py` | end-to-end test inference and output writing (applies the second stage when `<model-dir>/stack/` exists) |

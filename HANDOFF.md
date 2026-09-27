@@ -35,6 +35,36 @@ Contents
   real test set because of France.
 - The write-up `Documentation_template.md` is complete except **team name and members**.
 
+## 1b. Update, 27 Sep evening: full-data run on AWS
+
+Everything below was run on an AWS `r6i.4xlarge` (16 vCPU, 128 GB); logs are in `logs/`.
+
+| model | training data | validation macro F0.5 |
+| --- | --- | --- |
+| v1 (`work/model/`) | 14 states, 20 % of Source 1, 7.6 M pairs | 0.9747 |
+| v2 full data | all of India + US, 33.5 M pairs, 127 leaves, 3,000 rounds | 0.9780 |
+| v2 + second stage (`stack.py`) | same, entity-context re-scoring | 0.9789 |
+| v3 first stage (`work/model_v2/`, gzipped) | 255 leaves, early-stopped at 4,630 rounds | 0.9784 |
+| **v3 + second stage (`work/model_v2/stack/`)**, the submitted model | | **0.9792** (India 0.9752, US 0.9820) |
+
+Blocking on the full data: India recall 98.2 %, US 99.35 %, oracle ceiling 0.9964.
+
+What this says: training on all the data gave +0.33 points, the second stage +0.1, bigger trees
+and more rounds +0.04. The first-stage features are saturated; the remaining ≈ 2 % of entity
+error is not separable by re-weighting what is computed now. Leaderboard on 27 Sep: top 3 at
+0.9918, top 100 at ≈ 0.988. Closing that gap needs *new signal*, not more tuning:
+
+1. Check French records against real data; the French handling in `normalize.py` was never verified.
+2. A character-level or transformer name-similarity model for the address-missing candidates
+   (41 % of misses) and the near-copy distractors (88 % of false positives).
+3. Only then, iterate on validation for days, as the top teams did.
+
+To reproduce the submitted model: the block/features steps of `scripts/run_full_retrain.sh`, then
+`train.py` (already set to 255 leaves) with `--rounds 8000`, then
+`stack.py --model-dir work/model_v2 --features work/full_feats_India work/full_feats_US … --out-dir work/model_v2/stack`,
+then `predict.py --model-dir work/model_v2`, which applies the second stage automatically when
+`work/model_v2/stack/model2.txt` exists. Unzip `work/model_v2/model.txt.gz` first.
+
 ## 2. What is in the bundle
 
 `code_and_model_for_team.zip` (17 MB), identical to the git repo:
